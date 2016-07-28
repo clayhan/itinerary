@@ -6,6 +6,8 @@ var parser = require('body-parser');
 var bcrypt = require('bcrypt-nodejs');
 var Promise = require('bluebird');
 var requestYelp = require('./yelp').requestYelp;
+var requestNomad = require('./nomad').requestNomad;
+
 var cipher = Promise.promisify(bcrypt.hash);
 
 // var createSession = function(req, res, newUser) {
@@ -51,7 +53,7 @@ module.exports = {
           }
         })
         .spread(function(user, created) {
-          if(created) {
+          if (created) {
             console.log('created');
             util.createSession(req, res, user);
             // Redirect to index?
@@ -71,8 +73,9 @@ module.exports = {
 
     logout: function(req, res) {
       req.session.destroy(function(err) {
-        if (err) { console.log(err); }
-        else {
+        if (err) {
+          console.log(err);
+        } else {
           console.log('logout', req.session);
           console.log('logout successful');
           res.sendStatus(200);
@@ -151,7 +154,7 @@ module.exports = {
                 ItineraryId: itinerary.dataValues.id
               });
             });
-          })
+          });
         }
         var resObj = {
           id: itinerary.dataValues.id
@@ -176,7 +179,7 @@ module.exports = {
         .then(function(itineraries) {
           res.json(itineraries);
         });
-      })
+      });
     },
     getLocationItineraries: function(req, res) {
       db.Itinerary.findAll({
@@ -187,7 +190,7 @@ module.exports = {
       })
       .then(function(itineraries) {
         res.json(itineraries);
-      })
+      });
     }
   },
 
@@ -246,7 +249,27 @@ module.exports = {
         .then(function(events) {
           res.json(events);
         });
-      })
+      });
+    }
+  },
+  /************************************************
+  // Requests to /city
+  ************************************************/  
+  city: {
+    getNomad: function(req, res) {
+      // var response = {};
+      var city = req.body.location;
+      city = city.split("");
+      for (var i = 0; i < city.length; i++) {
+        if (city[i] === " ") {
+          city[i] = "-";
+        }
+      }
+      city = city.join("");
+
+      requestNomad(city, function(err, resp, body) {
+        res.json(resp);
+      });
     }
   },
 
@@ -283,7 +306,7 @@ module.exports = {
         .then(function() {
           res.send('Events posted!');
         });
-      })
+      });
     }
   }
 };

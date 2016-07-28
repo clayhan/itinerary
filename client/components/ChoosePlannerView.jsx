@@ -33,13 +33,13 @@ class ChoosePlannerView extends React.Component {
         this.setState({numDays: this.getDateDiff()});
       }        
     });
-  };
+  }
 
 
   getDateDiff() {
     var start = this.state.startDate;
     var end = this.state.endDate;
-    var dayInMilliseconds = 1000 * 60 * 60 * 24
+    var dayInMilliseconds = 1000 * 60 * 60 * 24;
     if (start && end) {
       var startDate = new Date(start);
       var endDate = new Date(end);
@@ -49,7 +49,7 @@ class ChoosePlannerView extends React.Component {
     }
 
     return (numDays && numDays > 0) ? numDays : 0;
-  };
+  }
 
   serverRequest(url, data, callback) {
     // If second parameter is empty function performs a GET request
@@ -75,13 +75,65 @@ class ChoosePlannerView extends React.Component {
     });
   }
 
+  serverRequest2(url, data) {
+
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
+    })
+    .then(res => {
+      console.log('Successful serverRequest2 POST-request', res);
+      return res.json();
+    })
+    .catch(err => {
+      console.log(err);
+    });
+    // If second parameter is empty function performs a GET request
+    // var method = data === undefined ? 'GET' : 'POST';
+    // fetch(url, {
+    //   headers: {
+    //     'Accept': 'application/json',
+    //     'Content-Type': 'application/json'
+    //   },
+    //   credentials: 'same-origin',
+    //   method: method,
+    //   body: JSON.stringify(data)
+    // })
+    // .then(res => {
+    //   console.log('Successful serverRequest2 POST-request', res);
+    //   return res.json();
+    // })
+    // .catch(err => {
+    //   console.log(err);
+    // });
+  }
+
   getItinerary() {
-    console.log('getting itinerary')
+    console.log('getting itinerary');
     this.serverRequest(
       '/classes/events',
       { location: this.state.location },
       this.formatYelpData.bind(this)
     );
+  }
+
+  getNomad() {
+    console.log('getting nomad');
+    this.serverRequest2(
+      '/classes/city',
+      {location: this.state.location}, console.log
+    );
+
+  }
+
+  getData() {
+    console.log('getting getData');
+    this.getItinerary();
+    this.getNomad();
   }
 
   swap() {
@@ -100,13 +152,13 @@ class ChoosePlannerView extends React.Component {
     newEvents[index] = target;
     newEvents[targetIdx] = temp;
     this.setState({events: newEvents});
-  };
+  }
 
   handleChange(event) {
     var newState = {};
     newState[event.target.id] = event.target.value;
     this.setState(newState);
-  };
+  }
 
   formatYelpData(data) {
     // Make the events from yelp nice
@@ -169,7 +221,7 @@ class ChoosePlannerView extends React.Component {
     this.serverRequest('/classes/itineraries', data, (json) => {
       this.setState({
         itineraryId: json.id
-      })
+      });
     });
   }
 
@@ -200,8 +252,8 @@ class ChoosePlannerView extends React.Component {
           </form>
           <p></p>
           <div className='planner-prefs'>
-            <button className="btn btn-success" onClick={this.getItinerary.bind(this)}>Blank Itinerary</button>
-            <button className="btn btn-success" onClick={this.getItinerary.bind(this)}>Preference-Based Itinerary</button>
+            <button className="btn btn-success" onClick={this.getData.bind(this)}>Blank Itinerary</button>
+            <button className="btn btn-success" onClick={this.getData.bind(this)}>Preference-Based Itinerary</button>
           </div>
         </div>
         <div>
